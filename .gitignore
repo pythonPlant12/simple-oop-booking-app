@@ -1,0 +1,5 @@
+/.venv
+.idea
+exercise/__pycache__
+.DS_Store
+exercise/planning.txt
