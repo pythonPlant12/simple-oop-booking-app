@@ -1,12 +1,10 @@
 import pandas as pd
 
-# dtype str is to read all the data in string mode
-# You can do as dtype=str but it will convert all dataframe to string
-# To make only specific column, dtype={"id": str}
 df = pd.read_csv("hotels.csv", dtype={"id": str})
-# Change dtype to string and change in to DICT with orient records
+
 df_card = pd.read_csv("cards.csv", dtype=str).to_dict(orient="records")
 df_card_security = pd.read_csv("card_security.csv", dtype=str)
+
 
 class Hotel:
     
@@ -17,8 +15,6 @@ class Hotel:
     def book(self):
         """Book a hotel by changing its availability to no"""
         df.loc[df["id"] == self.hotel_id, "available"] = "no"
-        # This function is to rewrite a .csv file, index=False it to not add
-        # new cell.
         df.to_csv("hotels.csv", index=False)
         
     def available(self):
@@ -68,6 +64,26 @@ class SecureCreditCard(CreditCard):
         else:
             return False
     
+    
+class Spa:
+    def __init__(self, hotel_id, name):
+        self.hotel_name = df.loc[df["id"] == hotel_id, "name"].squeeze()
+        self.name = name
+        
+        
+class ReservationTicketSpa(Spa):
+    def generate(self):
+        message = f"""
+        Thank you for your SPA reservation!
+        Here are your SPA booking data:
+        Name: {name}
+        Hotel name: {self.hotel_name}
+        """
+        return message
+
+            
+    
+    
 print(df)    
 hotel_ID = input("Enter the id of the hotel: ")
 hotel = Hotel(hotel_ID)
@@ -76,12 +92,21 @@ if hotel.available():
         credit_card = SecureCreditCard(number="12345678123456")
         if credit_card.validate(expiration="12/26", holder= "JOHN SMITH", 
                                 cvc="123"):
-            if credit_card.authenticate(given_password="mypass1"):
+            if credit_card.authenticate(given_password="mypass"):
                 hotel.book()
                 name = input("Enter your name: ")
                 reservation_ticket = ReservationTicket(customer_name=name, 
                                                hotel_object=hotel)
                 print(reservation_ticket.generate())
+                spa = Spa(hotel_ID, name)
+                book_spa = input("Do you want to book spa ticket?: ")
+                message = book_spa.lower()
+                if message == "yes":
+                    spa_ticket = ReservationTicketSpa(hotel_ID)
+                    print(spa_ticket.generate())
+                else:
+                    print("Ok. Thanks anyway!")
+                
             else:
                 print("Credit card authentification failed")
         else:
